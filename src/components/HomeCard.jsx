@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Image from 'next/image';
 
 // No static data - all countries will be fetched from Firebase
 
@@ -19,10 +20,14 @@ const DestinationCard = ({ destination }) => {
       onClick={handleCardClick}
     >
       <div className="relative">
-        <img
+        <Image
           src={destination.image}
           alt={destination.name}
+          width={400}
+          height={192}
           className="w-full h-48 object-cover"
+          placeholder="blur"
+          blurDataURL="https://via.placeholder.com/10x10?text=."
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = "https://via.placeholder.com/300x200?text=Image+Not+Found";

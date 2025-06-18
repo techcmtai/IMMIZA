@@ -149,7 +149,7 @@ export default function ApplicationDetail() {
     const typeMap = {
       'student': 'Student Visa',
       'tourist': 'Tourist Visa',
-      'work': 'Work Visa'
+      // 'work': 'Work Visa'
     };
     return typeMap[visaType?.toLowerCase()] || visaType;
   };

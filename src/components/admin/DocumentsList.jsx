@@ -24,7 +24,7 @@ const DocumentsList = ({ documents = [] }) => {
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">{doc.type}</p>
                       <p className="text-sm text-gray-500">
-                        {doc.originalName} ({Math.round(doc.size / 1024)} KB)
+                        {doc.originalName}
                       </p>
                     </div>
                   </div>

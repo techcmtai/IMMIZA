@@ -4,6 +4,9 @@ import { useRouter } from 'next/router';
 const VisaCard = ({ visa, destination }) => {
   const router = useRouter();
 
+  // Don't render if visa type is 'work'
+  if (visa?.name == 'Work Visa') return null;
+
   const handleStartApplication = () => {
     // Get the document checklist for this visa type
     const documentChecklist = visa?.documentChecklist || [];

@@ -255,7 +255,7 @@ const VisaTypeModal = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Work Visa */}
-                    <div
+                    {/* <div
                       onClick={() => handleVisaTypeSelect("Work")}
                       className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-300 cursor-pointer ${
                         selectedVisaType === "Work"
@@ -264,7 +264,7 @@ const VisaTypeModal = ({ isOpen, onClose }) => {
                       }`}
                     >
                       <h4 className="font-medium">Work</h4>
-                    </div>
+                    </div> */}
 
                     {/* Tourist Visa */}
                     <div

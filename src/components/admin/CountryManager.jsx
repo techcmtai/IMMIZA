@@ -27,14 +27,14 @@ const CountryManager = () => {
         validity: '',
         documentChecklist: ['']
       },
-      {
-        type: 'Work',
-        name: 'Work Visa',
-        typeLabel: 'Work',
-        stay: '',
-        validity: '',
-        documentChecklist: ['']
-      },
+      // {
+      //   type: 'Work',
+      //   name: 'Work Visa',
+      //   typeLabel: 'Work',
+      //   stay: '',
+      //   validity: '',
+      //   documentChecklist: ['']
+      // },
       {
         type: 'Student',
         name: 'Student Visa',
@@ -112,14 +112,14 @@ const CountryManager = () => {
           validity: '',
           documentChecklist: ['']
         },
-        {
-          type: 'Work',
-          name: 'Work Visa',
-          typeLabel: 'Work',
-          stay: '',
-          validity: '',
-          documentChecklist: ['']
-        },
+        // {
+        //   type: 'Work',
+        //   name: 'Work Visa',
+        //   typeLabel: 'Work',
+        //   stay: '',
+        //   validity: '',
+        //   documentChecklist: ['']
+        // },
         {
           type: 'Student',
           name: 'Student Visa',

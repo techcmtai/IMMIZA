@@ -370,6 +370,7 @@ export default function AgentApplicationDetail() {
                         <option value="Additional Document Needed">Additional Document Needed</option>
                         <option value="Additional Document Submitted">Additional Document Submitted</option>
                         <option value="Visa Approved">Visa Approved</option>
+                        <option value="Offer Letter Sent">Offer Letter Sent</option>
                       </select>
                     </div>
 

@@ -19,7 +19,6 @@ export default function Signup() {
   const [selectedVisaType, setSelectedVisaType] = useState('');
   const [loadingCountries, setLoadingCountries] = useState(false);
   const [existingEmployees, setExistingEmployees] = useState([]);
-  const [checkingSpecialization, setCheckingSpecialization] = useState(false);
 
   const { register } = useAuth();
 
@@ -218,7 +217,7 @@ export default function Signup() {
             <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">
               Sign up as
             </h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setUserType("user")}
@@ -251,103 +250,8 @@ export default function Signup() {
                 </p>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setUserType("employee")}
-                className={`flex flex-col items-center justify-center p-3 rounded-lg border ${
-                  userType === "employee"
-                    ? "bg-rose-50 border-[#b76e79] text-[#ae5361]"
-                    : "border-gray-300 text-black hover:bg-gray-50"
-                }`}
-              >
-                <FaUserCog className="text-xl mb-2" />
-                <span className="font-medium text-sm">Employee</span>
-                <p className="text-xs mt-1 text-gray-500 text-center">
-                  Handle specialized applications
-                </p>
-              </button>
             </div>
           </div>
-
-          {/* Employee-specific fields */}
-          {userType === 'employee' && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Specialization</h3>
-
-              {/* Country Selection */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country Specialization
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedCountry}
-                    onChange={(e) => setSelectedCountry(e.target.value)}
-                    className="block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-[#b76e79] focus:border-[#b76e79] appearance-none"
-                    disabled={loadingCountries}
-                  >
-                    <option value="">Select Country</option>
-                    {countries.map((country) => (
-                      <option key={country.id} value={country.id}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <FaChevronDown className="text-gray-400" />
-                  </div>
-                </div>
-                {loadingCountries && (
-                  <p className="text-sm text-gray-500 mt-2">Loading countries...</p>
-                )}
-              </div>
-
-              {/* Visa Type Selection */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visa Type Specialization (Select one)
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {['Student', 'Tourist', 'Work'].map((visaType) => {
-                    const isTaken = isVisaTypeTaken(visaType);
-                    const employeeName = getEmployeeForVisaType(visaType);
-
-                    return (
-                      <div key={visaType} className="relative">
-                        <button
-                          type="button"
-                          onClick={() => !isTaken && handleVisaTypeSelect(visaType)}
-                          disabled={isTaken}
-                          className={`w-full p-3 rounded-lg border text-sm font-medium transition-all ${
-                            isTaken
-                              ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                              : selectedVisaType === visaType
-                              ? "bg-[#b76e79] text-white border-[#b76e79]"
-                              : "border-gray-300 text-gray-700 hover:border-[#b76e79] hover:bg-gray-50"
-                          }`}
-                        >
-                          <div>{visaType}</div>
-                          {isTaken && (
-                            <div className="text-xs mt-1 text-red-500">
-                              Taken by {employeeName}
-                            </div>
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  You will only see applications matching your selected country and visa type
-                </p>
-                {selectedCountry && selectedVisaType && !isVisaTypeTaken(selectedVisaType) && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ✅ {selectedVisaType} visa for {countries.find(c => c.id === selectedCountry)?.name} is available
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (

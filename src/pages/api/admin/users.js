@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { getCookie } from 'cookies-next';
-import { getDocuments, getDocument, updateDocument, deleteDocument, COLLECTIONS } from '@/lib/firestore';
+import { getDocuments, getDocument, updateDocument, deleteDocument, addDocument, COLLECTIONS } from '@/lib/firestore';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -103,6 +103,35 @@ export default async function handler(req, res) {
       });
     }
 
+    // Handle POST request - add new user
+    if (req.method === 'POST') {
+      const { username, email, phoneNumber, role, password, country, visaType, createdAt, updatedAt } = req.body;
+      if (!username || !email || !phoneNumber || !role || !password) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide all required fields',
+        });
+      }
+      // Add user to Firestore
+      const newUser = await addDocument(COLLECTIONS.USERS, {
+        username,
+        email,
+        phoneNumber,
+        role,
+        password,
+        country: country || '',
+        visaType: visaType || '',
+        createdAt: createdAt || Date.now(),
+        updatedAt: updatedAt || Date.now(),
+      });
+      // Remove password before sending response
+      const { password: pw, ...userWithoutPassword } = newUser;
+      return res.status(200).json({
+        success: true,
+        data: userWithoutPassword,
+      });
+    }
+
     // Handle PUT request - update user role
     if (req.method === 'PUT') {
       const { userId, role } = req.body;
@@ -175,6 +204,7 @@ export default async function handler(req, res) {
       });
     }
 
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
       return res.status(405).json({
         success: false,
         message: 'Method not allowed'

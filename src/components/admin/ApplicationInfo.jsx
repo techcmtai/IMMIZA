@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const ApplicationInfo = ({ application, getStatusColor }) => {
   // Helper function to safely format dates from Firestore
@@ -22,6 +23,25 @@ const ApplicationInfo = ({ application, getStatusColor }) => {
 
     return 'N/A';
   };
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`/api/users/${application.userId}`);
+        if (response.data.success) {
+          setUser(response.data.user);
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+
+    if (application?.userId) {
+      fetchUser();
+    }
+  }, [application?.userId]);
 
   return (
     <div className="bg-white shadow overflow-hidden rounded-lg">
@@ -66,8 +86,8 @@ const ApplicationInfo = ({ application, getStatusColor }) => {
             </dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-gray-500">User ID</dt>
-            <dd className="mt-1 text-sm text-gray-900">{application.userId || 'N/A'}</dd>
+            <dt className="text-sm font-medium text-gray-500">User Name</dt>
+            <dd className="mt-1 text-sm text-gray-900">{user?.username || 'N/A'}</dd>
           </div>
 
           {application.agentId && (

@@ -16,11 +16,11 @@ const AboutUs = () => {
         <p className="text-white uppercase tracking-wider font-medium mb-2">SERVICES OFFERED</p>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Your Gateway to<br />Global Opportunities</h1>
         <p className="text-white text-lg max-w-3xl mx-auto">
-          Study Abroad, Study Visa, Work Visa, Tourist Visa - We've Got You Covered!
+          Study Abroad, Study Visa, Tourist Visa - We've Got You Covered!
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-12">
 
         {/* Study Visa Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -38,7 +38,7 @@ const AboutUs = () => {
         </div>
 
         {/* Work Visa Card */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+        {/* <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-start">
             <div className="mr-4 text-[#b76e79]">
               <FaBriefcase size={36} />
@@ -50,7 +50,7 @@ const AboutUs = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Tourist Visa Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">

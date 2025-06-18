@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaGlobe, FaPassport, FaPhone, FaSearch, FaUsers } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaGlobe, FaPassport, FaPhone, FaSearch, FaUsers, FaUserPlus, FaTimes, FaPlus } from 'react-icons/fa';
 import axios from 'axios';
 import AdminLayout from '@/components/admin/AdminLayout';
 
@@ -16,13 +16,29 @@ export default function EmployeeManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [countriesCount, setCountriesCount] = useState(0);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addUserError, setAddUserError] = useState(null);
+  const [addUserLoading, setAddUserLoading] = useState(false);
+  const [addUserData, setAddUserData] = useState({
+    username: '',
+    email: '',
+    phoneNumber: '',
+    role: 'employee',
+    password: '',
+    country: '',
+    visaType: '',
+    createdAt: '',
+    updatedAt: '',
+  });
+  const [users, setUsers] = useState([]);
+  const [countries, setCountries] = useState([]);
 
   // Fetch all employees
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
         setIsLoading(true);
-        console.log('Fetching employees, user:', user ? `${user.username} (${user.role})` : 'No user');
+        // console.log('Fetching employees, user:', user ? `${user.username} (${user.role})` : 'No user');
 
         // Get token from localStorage as a fallback
         let authToken = '';
@@ -52,7 +68,7 @@ export default function EmployeeManagement() {
           ? `/api/admin/employees?token=${encodeURIComponent(authToken)}`
           : '/api/admin/employees';
 
-        console.log('Fetching employees with URL:', url.includes('token=') ? 'URL with token' : 'URL without token');
+        // console.log('Fetching employees with URL:', url.includes('token=') ? 'URL with token' : 'URL without token');
 
         const response = await axios.get(url, {
           headers: {
@@ -92,6 +108,24 @@ export default function EmployeeManagement() {
 
     if (user && user.role === 'admin') {
       fetchEmployees();
+    } else if (user && user.role !== 'admin') {
+      router.push('/');
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await axios.get('/api/countries/');
+        // console.log('Countries:', response.data);
+        setCountries(response.data.countries);
+      } catch (error) {
+        console.error('Error fetching countries:', error);  
+      }
+    };  
+
+    if (user && user.role === 'admin') {
+      fetchCountries();
     } else if (user && user.role !== 'admin') {
       router.push('/');
     }
@@ -175,6 +209,14 @@ export default function EmployeeManagement() {
               Total: {totalCount} employees across {countriesCount} countries
             </p>
           </div>
+          <div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#b76e79] hover:bg-[#a25c67] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
+            >
+              <FaUserPlus className="mr-2" /> Add Employee
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -225,17 +267,16 @@ export default function EmployeeManagement() {
                       {filteredCountries.map((country) => {
                         const countryData = groupedEmployees[country];
                         const totalEmployees = (countryData.work?.length || 0) +
-                                             (countryData.tourist?.length || 0) +
-                                             (countryData.student?.length || 0) +
-                                             (countryData.unknown?.length || 0);
+                          (countryData.tourist?.length || 0) +
+                          (countryData.student?.length || 0) +
+                          (countryData.unknown?.length || 0);
 
                         return (
                           <button
                             key={country}
                             onClick={() => setSelectedCountry(country)}
-                            className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                              selectedCountry === country ? 'bg-rose-50 border-r-4 border-rose-500' : ''
-                            }`}
+                            className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${selectedCountry === country ? 'bg-rose-50 border-r-4 border-rose-500' : ''
+                              }`}
                           >
                             <div className="flex justify-between items-center">
                               <div>
@@ -374,6 +415,167 @@ export default function EmployeeManagement() {
           </div>
         )}
       </div>
+
+      {/* Add User Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200">
+            <div className="sticky top-0 bg-white flex justify-between items-center px-6 py-4 border-b z-10">
+              <h3 className="text-xl font-semibold text-gray-900">Add Employee</h3>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-400 hover:text-gray-500 p-2 rounded-full focus:outline-none"
+                aria-label="Close"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="px-6 py-6">
+              {addUserError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 mb-4 rounded">
+                  {addUserError}
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    value={addUserData.username}
+                    onChange={e => setAddUserData({ ...addUserData, username: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    value={addUserData.email}
+                    onChange={e => setAddUserData({ ...addUserData, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    value={addUserData.phoneNumber}
+                    onChange={e => setAddUserData({ ...addUserData, phoneNumber: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    value={addUserData.country}
+                    onChange={e => setAddUserData({ ...addUserData, country: e.target.value })}
+                  >
+                    {countries.map((country) => (
+                      <option key={country.id} value={country.name}>{country.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Visa Type</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    value={addUserData.visaType}
+                    defaultValue="tourist"
+                    onChange={e => setAddUserData({ ...addUserData, visaType: e.target.value })}
+                  >
+                    <option value="tourist">Tourist</option>
+                    <option value="student">Student</option>    
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <input
+                    type="password"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    value={addUserData.password}
+                    onChange={e => setAddUserData({ ...addUserData, password: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="sticky bottom-0 bg-white px-6 py-4 border-t flex flex-col sm:flex-row sm:justify-end sm:space-x-3 space-y-2 sm:space-y-0">
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                disabled={addUserLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setAddUserError(null);
+                  setAddUserLoading(true);
+                  try {
+                    let authToken = '';
+                    if (typeof window !== 'undefined') {
+                      const userData = localStorage.getItem('user');
+                      if (userData) {
+                        const parsedUser = JSON.parse(userData);
+                        if (parsedUser && parsedUser.token) {
+                          authToken = parsedUser.token;
+                        }
+                      }
+                    }
+                    // Ensure visaType is set (default to 'tourist' if empty)
+                    const payload = {
+                      ...addUserData,
+                      visaType: addUserData.visaType || 'tourist',
+                      createdAt: Date.now(),
+                      updatedAt: Date.now(),
+                    };
+                    const response = await fetch('/api/admin/users', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                      },
+                      body: JSON.stringify(payload),
+                      credentials: 'include',
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                      setUsers([data.data, ...users]);
+                      setIsAddModalOpen(false);
+                      setAddUserData({
+                        username: '',
+                        email: '',
+                        phoneNumber: '',
+                        role: 'employee',
+                        password: '',
+                        country: '',
+                        visaType: 'tourist',
+                        createdAt: '',
+                        updatedAt: '',
+                      });
+                    } else {
+                      setAddUserError(data.message || 'Failed to add user.');
+                    }
+                  } catch (err) {
+                    setAddUserError('Failed to add user.');
+                  } finally {
+                    setAddUserLoading(false);
+                  }
+                }}
+                className="w-full sm:w-auto px-4 py-2 bg-[#b76e79] border border-transparent rounded-md text-sm font-medium text-white hover:bg-[#a25c67] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+                disabled={addUserLoading}
+              >
+                {addUserLoading ? (
+                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                ) : (
+                  <FaPlus className="mr-2" />
+                )}
+                  Add Employee
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

@@ -240,7 +240,7 @@ export default function AgentDashboard() {
 
         {/* Applications Table */}
         <div className="bg-white shadow overflow-hidden rounded-lg">
-          <div className="px-4 py-5 sm:px-6 bg-gray-50 flex justify-between items-center">
+          <div className="px-4 py-5 sm:px-6 bg-gray-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <div>
               <h2 className="text-lg font-medium text-gray-900">
                 {filterType === 'accepted' ? 'My Visa Applications' : 'All Visa Applications'}
@@ -250,17 +250,6 @@ export default function AgentDashboard() {
                   ? 'Manage your accepted visa applications'
                   : 'Accept and manage visa applications'}
               </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Show:</span>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 cursor-pointer"
-              >
-                <option value="accepted">My Applications</option>
-                <option value="all">All Applications</option>
-              </select>
             </div>
           </div>
 

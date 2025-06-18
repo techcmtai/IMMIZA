@@ -14,10 +14,10 @@ const StatusUpdateForm = ({
   updateSuccess,
   updateError,
   requiredDocuments,
-  setRequiredDocuments
+  setRequiredDocuments,
+  setOfferLetterFile
 }) => {
-  // Show document input field when status is "Additional Documents Needed"
-  const showDocumentField = newStatus === 'Additional Documents Needed';
+  
 
   // Initialize or clear document fields when status changes
   useEffect(() => {
@@ -76,6 +76,10 @@ const StatusUpdateForm = ({
     // Call the parent component's handler
     handleStatusUpdate(e);
   };
+
+  // Show document input field when status is "Additional Documents Needed"
+  const showDocumentField = newStatus === 'Additional Documents Needed';
+
   return (
     <div className="bg-white shadow overflow-hidden rounded-lg sticky top-20">
       <div className="px-4 py-5 sm:px-6 bg-[#b76e79] text-white">
@@ -143,7 +147,7 @@ const StatusUpdateForm = ({
                 rows={2}
                 value={statusNote}
                 onChange={(e) => setStatusNote(e.target.value)}
-                className="shadow-sm focus:ring-[#b76e79] focus:border-[#b76e79] mt-2 block w-full sm:text-sm border-gray-300 rounded-md"
+                className="shadow-sm p-2 focus:ring-[#b76e79] focus:border-[#b76e79] mt-2 block w-full sm:text-sm border-gray-300 rounded-md"
                 placeholder="Add details about this status update. "
                 required
               />
@@ -165,7 +169,7 @@ const StatusUpdateForm = ({
                   id="tentativeDate"
                   value={tentativeDate}
                   onChange={(e) => setTentativeDate(e.target.value)}
-                  className="focus:ring-[#b76e79] focus:border-[#b76e79] block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-[#b76e79] focus:border-[#b76e79] py-2 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500">
@@ -173,6 +177,26 @@ const StatusUpdateForm = ({
               </p>
             </div>
 
+            {/* Offer Letter Upload Field - only show when status is 'Offer Letter Sent' */}
+            {newStatus === 'Offer Letter Sent' && (
+              <div>
+                <label htmlFor="offerLetter" className="block text-sm font-medium text-gray-700">
+                  Offer Letter <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="file"
+                  name="offerLetter"
+                  id="offerLetter"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={e => setOfferLetterFile(e.target.files[0])}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#b76e79] focus:border-[#b76e79] sm:text-sm rounded-md"
+                  required
+                />
+                <p className="mt-1 text-xs text-gray-500">Upload the offer letter (PDF, JPG, PNG)</p>
+              </div>
+            )}
+
+            {/* Additional Documents Needed Block */}
             {newStatus === 'Additional Documents Needed' && (
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -182,7 +206,7 @@ const StatusUpdateForm = ({
                   <button
                     type="button"
                     onClick={addDocumentField}
-                    className="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+                    className="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-[#b76e79] hover:bg-[#a25c67] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
                   >
                     <FaPlus className="h-3 w-3" aria-hidden="true" />
                   </button>
@@ -201,7 +225,7 @@ const StatusUpdateForm = ({
                           id={`requiredDocument-${index}`}
                           value={doc}
                           onChange={(e) => updateDocumentField(index, e.target.value)}
-                          className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                          className="focus:ring-blue-500 focus:border-blue-500 py-2 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
                           placeholder="e.g., Adhar Card, Passport, etc."
                           required={newStatus === 'Additional Documents Needed'}
                         />
@@ -231,8 +255,6 @@ const StatusUpdateForm = ({
                 )}
               </div>
             )}
-
-
 
             <div>
               <button

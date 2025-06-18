@@ -10,24 +10,21 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-<h2 className="text-2xl font-bold text-[#b76e79] mb-4 flex items-center space-x-2">
-  <img src="/images/logo.png" alt="IMMIZA Logo" className="h-8 w-8" />
-  <span>IMMIZA</span>
-</h2>
+            <h2 className="text-2xl font-bold text-[#b76e79] mb-4 flex items-center space-x-2">
+              <img src="/images/logo.png" alt="IMMIZA Logo" className="h-8 w-8" />
+              <span>IMMIZA</span>
+            </h2>
             <p className="mb-4 text-sm">
               Your trusted partner for visa and immigration services. We make the complex visa process simple and stress free.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://www.facebook.com/share/1AqjN1jNxx/?mibextid=wwXIfr" className="text-gray-400 hover:text-white transition-colors">
                 <FaFacebookF />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FaTwitter />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://www.instagram.com/immizaportal?igsh=MmF0aXpsNWJ0d3l3" className="text-gray-400 hover:text-white transition-colors">
                 <FaInstagram />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://www.linkedin.com/in/immiza-portal-85308836a/" className="text-gray-400 hover:text-white transition-colors">
                 <FaLinkedinIn />
               </a>
             </div>
@@ -47,30 +44,23 @@ const Footer = () => {
                   About Us
                 </Link>
               </li>
-             
+
               <li>
                 <Link href="#destination" className="text-gray-400 hover:text-white transition-colors">
                   Destinations
                 </Link>
               </li>
-              
+
             </ul>
           </div>
 
           {/* Our Offices */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Our Offices</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Our Office</h3>
             <div className="space-y-4">
               <div>
-                <h4 className="text-white">Bengaluru</h4>
                 <p className="text-sm text-gray-400">
-                  HRIVE Workspace - No.112, AKR Tech Park, 7th Mile Hosur Rd Krishna Reddy Industrial Area, Bengaluru, Karnataka 560068
-                </p>
-              </div>
-              <div>
-                <h4 className="text-white">Mumbai</h4>
-                <p className="text-sm text-gray-400">
-                  Godrej Greenvile Park, Lal Bahadur Shastri Marg, Mumbai, Maharashtra, 400086
+                  Sco-11-12, Sarojai Tower, Ground Floor, New Bus Stand, Kurukshetra, Haryana, 136118
                 </p>
               </div>
             </div>
@@ -123,7 +113,7 @@ const Footer = () => {
             <Link href="/term" className="text-sm text-gray-500 hover:text-white transition-colors">
               Terms of Service
             </Link>
-            
+
           </div>
         </div>
       </div>

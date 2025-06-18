@@ -84,14 +84,6 @@ export default function DestinationDetail() {
                 documentChecklist: ["Passport (valid for 6 months)", "Passport-sized photographs"]
               },
               {
-                type: "Work",
-                name: "Work Visa",
-                typeLabel: "Work",
-                stay: "60 days",
-                validity: "180 days",
-                documentChecklist: ["Valid passport", "Offer letter from the employer"]
-              },
-              {
                 type: "Student",
                 name: "Student Visa",
                 typeLabel: "Student",
@@ -126,14 +118,6 @@ export default function DestinationDetail() {
                   stay: "30 days",
                   validity: "90 days",
                   documentChecklist: ["Passport (valid for 6 months)", "Passport-sized photographs"]
-                },
-                {
-                  type: "Work",
-                  name: "Work Visa",
-                  typeLabel: "Work",
-                  stay: "60 days",
-                  validity: "180 days",
-                  documentChecklist: ["Valid passport", "Offer letter from the employer"]
                 },
                 {
                   type: "Student",

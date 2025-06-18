@@ -29,12 +29,16 @@ export default function ApplicationDetail() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updateError, setUpdateError] = useState('');
 
+  // Add offerLetterFile state for file upload
+  const [offerLetterFile, setOfferLetterFile] = useState(null);
+
   // Status options - limited to only 4 main statuses
   const statusOptions = [
     'Document Submitted',
     'Additional Documents Needed',
     'Additional Document Submitted',
-    'Visa Approved'
+    'Visa Approved',
+    'Offer Letter Sent'
   ];
 
   // Redirect if not admin
@@ -86,8 +90,6 @@ export default function ApplicationDetail() {
         .filter(doc => doc && doc.trim() !== '')
         .map(doc => doc.trim());
 
-      console.log('Sending status update with documents:', filteredDocuments);
-
       // Make sure we have at least one document if status is "Additional Documents Needed"
       if (newStatus === 'Additional Documents Needed' && filteredDocuments.length === 0) {
         setUpdateError('Please add at least one required document');
@@ -95,45 +97,45 @@ export default function ApplicationDetail() {
         return;
       }
 
-      const requestData = {
+      // Prepare requestData
+      let requestData = {
         status: newStatus,
         note: statusNote,
         tentativeDate: tentativeDate ? new Date(tentativeDate).toISOString() : null,
-        requiredDocuments: newStatus === 'Additional Documents Needed' ? filteredDocuments : []
+        requiredDocuments: newStatus === 'Additional Documents Needed' ? filteredDocuments : [],
       };
 
-      console.log('Full request data:', requestData);
+      // If offerLetterFile is present and status is 'Offer Letter Sent', convert to base64 and add to payload
+      if (newStatus === 'Offer Letter Sent' && offerLetterFile) {
+        const toBase64 = (file) => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result); // send full dataURL
+          reader.onerror = error => reject(error);
+        });
+        const base64Data = await toBase64(offerLetterFile);
+        requestData.offerLetter = {
+          filename: offerLetterFile.name,
+          data: base64Data, // full dataURL
+        };
+      }
 
-      const response = await axios.put(`/api/applications/${id}`, requestData);
-
-      console.log('API response:', response.data);
+      const response = await axios.post(`/api/applications/${id}/update-status`, requestData);
 
       if (response.data.success) {
-        console.log('Status update successful');
-        console.log('Updated application:', response.data.application);
-        console.log('Status history:', response.data.application.statusHistory);
-
-        // Check if requiredDocuments were saved
-        const latestStatus = response.data.application.statusHistory[response.data.application.statusHistory.length - 1];
-        console.log('Latest status entry:', latestStatus);
-        console.log('Required documents in latest status:', latestStatus.requiredDocuments);
-
         setApplication(response.data.application);
         setUpdateSuccess(true);
         setStatusNote('');
         setTentativeDate('');
         setRequiredDocuments(['']);
-
-        // Auto-hide success message after 3 seconds
+        setOfferLetterFile(null);
         setTimeout(() => {
           setUpdateSuccess(false);
         }, 3000);
       } else {
-        console.error('Status update failed:', response.data.message);
         setUpdateError(response.data.message || 'Failed to update status');
       }
     } catch (error) {
-      console.error('Error updating application status:', error);
       setUpdateError('An error occurred while updating the status. Please try again.');
     } finally {
       setIsUpdating(false);
@@ -261,6 +263,8 @@ export default function ApplicationDetail() {
                 isUpdating={isUpdating}
                 updateSuccess={updateSuccess}
                 updateError={updateError}
+                offerLetterFile={offerLetterFile}
+                setOfferLetterFile={setOfferLetterFile}
               />
             </div>
           </div>

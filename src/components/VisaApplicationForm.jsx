@@ -269,7 +269,6 @@ export default function VisaApplicationForm({ destinationId: propDestinationId, 
             </li>
           </ul>
 
-
           ) : (
             <p className="text-[#b76e79] text-sm italic">
               No specific documents are required for this visa type.

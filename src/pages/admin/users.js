@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaEdit, FaTrash, FaTimes, FaUserShield, FaUserCog, FaPhone } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaEdit, FaTrash, FaTimes, FaUserShield, FaUserCog, FaPhone, FaUserPlus, FaPlus } from 'react-icons/fa';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function UsersAdmin() {
@@ -14,6 +14,18 @@ export default function UsersAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userRole, setUserRole] = useState('user');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addUserData, setAddUserData] = useState({
+    username: '', 
+    email: '', 
+    phoneNumber: '', 
+    role: 'user', 
+    password: '',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  const [addUserLoading, setAddUserLoading] = useState(false);
+  const [addUserError, setAddUserError] = useState(null);
 
   // Redirect if not admin
   useEffect(() => {
@@ -27,7 +39,7 @@ export default function UsersAdmin() {
     const fetchUsers = async () => {
       try {
         setIsLoading(true);
-        console.log('Fetching users, user:', user ? `${user.username} (${user.role})` : 'No user');
+        // console.log('Fetching users, user:', user ? `${user.username} (${user.role})` : 'No user');
 
         // Get token from localStorage as a fallback
         let authToken = '';
@@ -46,7 +58,7 @@ export default function UsersAdmin() {
           ? `/api/admin/users?token=${encodeURIComponent(authToken)}`
           : '/api/admin/users';
 
-        console.log('Fetching users with URL:', url.includes('token=') ? 'URL with token' : 'URL without token');
+        // console.log('Fetching users with URL:', url.includes('token=') ? 'URL with token' : 'URL without token');
 
         const response = await fetch(url, {
           credentials: 'include', // Include cookies in the request
@@ -63,7 +75,7 @@ export default function UsersAdmin() {
         }
 
         const data = await response.json();
-        console.log('Users data received:', data.count);
+        // console.log('Users data received:', data.count);
 
         if (data.success) {
           setUsers(data.data || []);
@@ -286,6 +298,32 @@ export default function UsersAdmin() {
     ? users
     : users.filter(user => user.role === roleFilter);
 
+  // Add user handler (dummy, replace with real API call)
+  const handleAddUser = async () => {
+    setAddUserError(null);
+    setAddUserLoading(true);
+    try {
+        const response = await fetch('/api/admin/users', {
+            method: 'POST',
+            body: JSON.stringify(addUserData),
+            credentials: 'include',
+        });
+        const data = await response.json(); 
+
+        if (response.ok && data.success) {
+          setUsers([data.data, ...users]);
+          setIsAddModalOpen(false);
+          setAddUserData({ username: '', email: '', phoneNumber: '', role: 'user', password: '', createdAt: new Date(), updatedAt: new Date() });
+        } else {
+          setAddUserError(data.message || 'Failed to add user.');
+        }
+      } catch (err) {
+      setAddUserError('Failed to add user.');
+    } finally {
+      setAddUserLoading(false);
+    }
+  };
+
   if (loading || !user) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-64px)]">
@@ -297,7 +335,15 @@ export default function UsersAdmin() {
   return (
     <AdminLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">User Management</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+          {/* <button
+            className="flex items-center gap-2 bg-[#b76e79] hover:bg-[#a25c67] text-white font-medium px-4 py-2 rounded-md shadow transition-colors"
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            <FaUserPlus className="mr-2" /> Add User
+          </button> */}
+        </div>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-6 rounded">
@@ -480,7 +526,7 @@ export default function UsersAdmin() {
 
         {/* User Edit Modal */}
         {isModalOpen && selectedUser && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="sticky top-0 bg-white flex justify-between items-center px-4 sm:px-6 py-4 border-b z-10">
                 <h3 className="text-lg font-medium text-gray-900">Edit User</h3>
@@ -561,6 +607,102 @@ export default function UsersAdmin() {
             </div>
           </div>
         )}
+
+        {/* Add User Modal
+        {isAddModalOpen && (
+          <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-200">
+              <div className="sticky top-0 bg-white flex justify-between items-center px-6 py-4 border-b z-10">
+                <h3 className="text-xl font-semibold text-gray-900">Add User</h3>
+                <button
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500 p-2 rounded-full focus:outline-none"
+                  aria-label="Close"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <div className="px-6 py-6">
+                {addUserError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 mb-4 rounded">
+                    {addUserError}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      value={addUserData.username}
+                      onChange={e => setAddUserData({ ...addUserData, username: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      value={addUserData.email}
+                      onChange={e => setAddUserData({ ...addUserData, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      value={addUserData.phoneNumber}
+                      onChange={e => setAddUserData({ ...addUserData, phoneNumber: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      value={addUserData.role}
+                      onChange={e => setAddUserData({ ...addUserData, role: e.target.value })}
+                    >
+                      <option value="user">Regular User</option>
+                      <option value="agent">Agent</option>
+                      <option value="admin">Administrator</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input
+                      type="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      value={addUserData.password}
+                      onChange={e => setAddUserData({ ...addUserData, password: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="sticky bottom-0 bg-white px-6 py-4 border-t flex flex-col sm:flex-row sm:justify-end sm:space-x-3 space-y-2 sm:space-y-0">
+                <button
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  disabled={addUserLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddUser}
+                  className="w-full sm:w-auto px-4 py-2 bg-[#b76e79] border border-transparent rounded-md text-sm font-medium text-white hover:bg-[#a25c67] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+                  disabled={addUserLoading}
+                >
+                  {addUserLoading ? (
+                    <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                  ) : (
+                    <FaPlus className="mr-2" />
+                  )}
+                  Add User
+                </button>
+              </div>
+            </div>
+          </div>
+        )} */}
       </div>
     </AdminLayout>
   );

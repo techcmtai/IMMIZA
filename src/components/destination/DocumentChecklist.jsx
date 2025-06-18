@@ -80,7 +80,7 @@ const DocumentChecklist = ({ selectedVisaType, filteredVisas, destination, setSe
           </svg>
           <p className="text-gray-600 mb-4">Please select a specific visa type to view the document checklist.</p>
           <div className="flex justify-center space-x-2">
-            {["Tourist", "Work", "Student"].map((type) => (
+            {["Tourist", "Student"].map((type) => (
               <button
                 key={type}
                 onClick={() => setSelectedVisaType(type)}

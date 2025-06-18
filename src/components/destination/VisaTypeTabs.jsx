@@ -6,7 +6,7 @@ const VisaTypeTabs = ({ selectedVisaType, setSelectedVisaType, destinationName }
       {/* Visa Type Tabs */}
       <div className="flex justify-center mb-6 sm:mb-8 overflow-x-auto pb-2">
         <div className="bg-gray-100 p-1 rounded-xl shadow-md flex space-x-2 sm:space-x-4">
-          {["All", "Tourist", "Work", "Student"].map((type) => (
+          {["All", "Tourist", "Student"].map((type) => (
             <button
               key={type}
               onClick={() => setSelectedVisaType(type)}

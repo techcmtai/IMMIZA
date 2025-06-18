@@ -1,4 +1,5 @@
 import { getDocument, updateDocument } from '@/lib/firestore';
+import { uploadBase64Image } from '@/lib/storage-firebase';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     const { id } = req.query;
-    const { status, note, tentativeDate, requiredDocuments } = req.body;
+    const { status, note, tentativeDate, requiredDocuments, offerLetter } = req.body;
 
     if (!id || !status) {
       return res.status(400).json({
@@ -15,6 +16,13 @@ export default async function handler(req, res) {
         message: 'Application ID and status are required',
       });
     }
+
+    let offerLetterUrl = null;
+    if (offerLetter && offerLetter.data && offerLetter.filename) {
+      const offerLetterPath = `imiiza_documents/offer_letters/${offerLetter.filename}`;
+      offerLetterUrl = await uploadBase64Image(offerLetter.data, offerLetterPath);
+    }
+    console.log("offerLetterUrl", offerLetterUrl);
 
     // Get the application
     const application = await getDocument('applications', id);
@@ -32,18 +40,44 @@ export default async function handler(req, res) {
       note: note || `Status updated to ${status}`,
       tentativeDate: tentativeDate || null,
     };
+    if (offerLetterUrl) {
+      newStatusEntry.offerLetter = offerLetterUrl;
+    }
 
     // Add required documents if provided
     if (requiredDocuments && requiredDocuments.length > 0) {
-      newStatusEntry.requiredDocuments = requiredDocuments.filter(doc => doc.trim() !== '');
+      newStatusEntry.requiredDocuments = requiredDocuments.filter(doc => doc && doc.trim() !== '');
     }
 
-    // Update application with new status and history
+    // Add offer letter to documents array if uploaded
+    let documents = Array.isArray(application.documents) ? [...application.documents] : [];
+    if (offerLetterUrl) {
+      let docObj = {
+        url: (typeof offerLetterUrl === 'string' ? offerLetterUrl : offerLetterUrl.url) || '',
+        originalName: offerLetter.filename || '',
+        uploadDate: new Date().toISOString(),
+        type: 'Offer Letter',
+        size: offerLetter.size || offerLetterUrl.size || null,
+        storagePath: offerLetterUrl.path || offerLetterUrl.storagePath || '',
+        contentType: offerLetterUrl.contentType || offerLetterUrl.mimeType || '',
+        mimeType: offerLetterUrl.mimeType || offerLetterUrl.contentType || '',
+      };
+      // Remove any undefined fields (Firestore does not allow undefined)
+      Object.keys(docObj).forEach(key => {
+        if (docObj[key] === undefined) {
+          docObj[key] = '';
+        }
+      });
+      documents.push(docObj);
+    }
+
+    // Update application with new status, history, and documents
     const statusHistory = [...(application.statusHistory || []), newStatusEntry];
 
     const updatedApplication = await updateDocument('applications', id, {
       currentStatus: status,
       statusHistory,
+      documents,
     });
 
     return res.status(200).json({

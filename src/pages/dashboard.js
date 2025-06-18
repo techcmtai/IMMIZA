@@ -77,6 +77,64 @@ export default function Dashboard() {
           <div className="p-4">
             <SubmittedApplications applications={applications} />
           </div>
+
+          {/* Offer Letter Content */}
+          {applications.map((application) => (
+            <div key={application.id || application._id} className="bg-white rounded-lg border p-6 shadow-sm mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{application.name}</h3>
+                  <p className="text-gray-600 text-sm">
+                    {application.visaType && application.destination?.name
+                      ? `${application.visaType} Visa - ${application.destination.name}`
+                      : application.visaType || application.destination?.name || ''}
+                  </p>
+                  <p className="text-xs text-gray-500">Application ID: {application.id || application._id}</p>
+                </div>
+                {/* You can add status badge or other info here if needed */}
+              </div>
+
+              {/* Offer Letter Section */}
+              {Array.isArray(application.documents) ? (
+                (() => {
+                  const offerLetter = application.documents.find(doc => doc.type === 'Offer Letter' && doc.url);
+                  if (offerLetter) {
+                    return (
+                      <div className="mt-4 border-t pt-4">
+                        <h4 className="text-md font-semibold text-gray-800 mb-1">Offer Letter</h4>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-700">
+                              {offerLetter.originalName || "Offer Letter"}
+                              {offerLetter.size && (
+                                <> ({Math.round(offerLetter.size / 1024)} KB)</>
+                              )}
+                            </p>
+                            <p className="text-xs text-gray-500">{offerLetter.type}</p>
+                          </div>
+                          <a
+                            href={offerLetter.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            View Offer Letter
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="mt-4 border-t pt-4">
+                        <h4 className="text-md font-semibold text-gray-800 mb-1">Offer Letter</h4>
+                        <p className="text-sm text-gray-500 italic">Not Available</p>
+                      </div>
+                    );
+                  }
+                })()
+              ) : null}
+            </div>
+          ))}
         </div>
       </div>
     </div>
