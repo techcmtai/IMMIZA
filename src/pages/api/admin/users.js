@@ -143,10 +143,10 @@ export default async function handler(req, res) {
         });
       }
 
-      if (!['user', 'admin', 'agent'].includes(role)) {
+      if (!['user', 'admin', 'agent', 'sales'].includes(role)) {
         return res.status(400).json({
           success: false,
-          message: 'Role must be either "user", "agent", or "admin"',
+          message: 'Role must be either "user", "agent", "admin", or "sales"',
         });
       }
 

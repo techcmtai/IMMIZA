@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaEdit, FaTrash, FaTimes, FaUserShield, FaUserCog, FaPhone, FaUserPlus, FaPlus, FaPassport } from 'react-icons/fa';
-import Link from 'next/link';
-import AdminLayout from '@/components/admin/AdminLayout';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaEdit, FaTrash, FaTimes, FaUserShield, FaUserCog, FaPhone, FaUserPlus, FaPlus } from 'react-icons/fa';
+import SalesLayout from '@/components/sales/SalesLayout';
 
-export default function UsersAdmin() {
+export default function UsersSales() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState([]);
-  const [applicationCounts, setApplicationCounts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -29,16 +27,16 @@ export default function UsersAdmin() {
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [addUserError, setAddUserError] = useState(null);
 
-  // Redirect if not admin
+  // Redirect if not admin or sales
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!loading && (!user || !['admin', 'sales'].includes(user.role))) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
-  // Fetch users and application counts
+  // Fetch users
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUsers = async () => {
       try {
         setIsLoading(true);
         // console.log('Fetching users, user:', user ? `${user.username} (${user.role})` : 'No user');
@@ -76,27 +74,13 @@ export default function UsersAdmin() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const usersData = await response.json();
-        // console.log('Users data received:', usersData.count);
+        const data = await response.json();
+        // console.log('Users data received:', data.count);
 
-        if (usersData.success) {
-          setUsers(usersData.data || []);
-
-          // Now fetch all applications to count them
-          const appsResponse = await fetch('/api/applications');
-          const appsData = await appsResponse.json();
-          if (appsData.success) {
-            const counts = {};
-            appsData.applications.forEach(app => {
-              if (app.userId) {
-                counts[app.userId] = (counts[app.userId] || 0) + 1;
-              }
-            });
-            setApplicationCounts(counts);
-          }
-
+        if (data.success) {
+          setUsers(data.data || []);
         } else {
-          setError(usersData.message || 'Failed to fetch users');
+          setError(data.message || 'Failed to fetch users');
         }
       } catch (error) {
         setError('Error loading users. Please try again later.');
@@ -106,8 +90,8 @@ export default function UsersAdmin() {
       }
     };
 
-    if (user && user.role === 'admin') {
-      fetchData();
+    if (user && user.role === 'sales') {
+      fetchUsers();
     }
   }, [user]);
 
@@ -221,8 +205,6 @@ export default function UsersAdmin() {
         return 'bg-blue-100 text-blue-800';
       case 'agent':
         return 'bg-green-100 text-green-800';
-      case 'sales':
-        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -351,16 +333,16 @@ export default function UsersAdmin() {
   }
 
   return (
-    <AdminLayout>
+    <SalesLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <button
+          {/* <button
             className="flex items-center gap-2 bg-[#b76e79] hover:bg-[#a25c67] text-white font-medium px-4 py-2 rounded-md shadow transition-colors"
             onClick={() => setIsAddModalOpen(true)}
           >
             <FaUserPlus className="mr-2" /> Add User
-          </button>
+          </button> */}
         </div>
 
         {error && (
@@ -383,7 +365,6 @@ export default function UsersAdmin() {
             <option value="all">All Users</option>
             <option value="user">Regular Users</option>
             <option value="admin">Administrators</option>
-            <option value="sales">Sales</option>
           </select>
         </div>
 
@@ -396,7 +377,7 @@ export default function UsersAdmin() {
             <p className="text-gray-500">No users found.</p>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-auto sm:rounded-lg">
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
             {/* Desktop view - Table */}
             <div className="hidden md:block">
               <table className="min-w-full divide-y divide-gray-200">
@@ -415,14 +396,11 @@ export default function UsersAdmin() {
                       Joined
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Applications
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Role
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -453,25 +431,15 @@ export default function UsersAdmin() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Link href={`/admin/applications?userId=${userData.id || userData._id || userData.uid}`} legacyBehavior>
-                          <a className="text-sm text-blue-600 hover:underline flex items-center">
-                            <FaPassport className="text-gray-400 mr-2" />
-                            {applicationCounts[userData.id || userData._id || userData.uid] || 0} Applications
-                          </a>
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded-full ${getRoleBadgeColor(userData.role)}`}>
                           {userData.role === 'admin'
                             ? 'Administrator'
                             : userData.role === 'agent'
                               ? 'Agent'
-                              : userData.role === 'sales'
-                                ? 'Sales'
-                                : 'User'}
+                              : 'User'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-3">
                           <button
                             onClick={() => openUserModal(userData)}
@@ -490,7 +458,7 @@ export default function UsersAdmin() {
                             </button>
                           )}
                         </div>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -508,13 +476,11 @@ export default function UsersAdmin() {
                         <span className="text-sm font-medium text-gray-900">{userData.username}</span>
                       </div>
                       <span className={`px-2 py-1 text-xs rounded-full ${getRoleBadgeColor(userData.role)}`}>
-                        {userData.role === 'admin'
-                          ? 'Administrator'
+                        {userData.role === 'sales'
+                          ? 'Sales'
                           : userData.role === 'agent'
                             ? 'Agent'
-                            : userData.role === 'sales'
-                              ? 'Sales'
-                              : 'User'}
+                            : 'User'}
                       </span>
                     </div>
 
@@ -533,16 +499,7 @@ export default function UsersAdmin() {
                       <span className="text-xs text-gray-500">Joined: {formatDate(userData.createdAt)}</span>
                     </div>
 
-                    <div className="flex items-center mb-3">
-                      <FaPassport className="text-gray-400 mr-2" />
-                      <Link href={`/admin/applications?userId=${userData.id || userData._id || userData.uid}`} legacyBehavior>
-                        <a className="text-sm text-blue-600 hover:underline">
-                          Applications: {applicationCounts[userData.id || userData._id || userData.uid] || 0}
-                        </a>
-                      </Link>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 mt-2">
+                    {/* <div className="flex justify-end space-x-3 mt-2">
                       <button
                         onClick={() => openUserModal(userData)}
                         className="p-2 text-indigo-600 hover:text-indigo-900 cursor-pointer hover:bg-indigo-50 rounded-full"
@@ -559,7 +516,7 @@ export default function UsersAdmin() {
                           <FaTrash />
                         </button>
                       )}
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>
@@ -568,7 +525,7 @@ export default function UsersAdmin() {
         )}
 
         {/* User Edit Modal */}
-        {isModalOpen && selectedUser && (
+        {/* {isModalOpen && selectedUser && (
           <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="sticky top-0 bg-white flex justify-between items-center px-4 sm:px-6 py-4 border-b z-10">
@@ -623,13 +580,11 @@ export default function UsersAdmin() {
                   <p className="flex items-start">
                     <FaUserShield className="text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
                     <span>
-                      {userRole === 'admin'
-                        ? 'Administrators have full access to all features including user management and sensitive data.'
+                      {userRole === 'sales'
+                        ? 'Sales have full access to all features including user management and sensitive data.'
                         : userRole === 'agent'
                           ? 'Agents can view and process visa applications. They can accept applications and update their status.'
-                          : userRole === 'sales'
-                            ? 'Sales can view and process visa applications. They can accept applications and update their status.'
-                            : 'Regular users can only access their own data and applications.'}
+                          : 'Regular users can only access their own data and applications.'}
                     </span>
                   </p>
                 </div>
@@ -652,9 +607,9 @@ export default function UsersAdmin() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
-        {/* Add User Modal */}
+        {/* Add User Modal
         {isAddModalOpen && (
           <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-200">
@@ -712,7 +667,6 @@ export default function UsersAdmin() {
                       <option value="user">Regular User</option>
                       <option value="agent">Agent</option>
                       <option value="admin">Administrator</option>
-                      <option value="sales">Sales</option>
                     </select>
                   </div>
                   <div>
@@ -749,8 +703,8 @@ export default function UsersAdmin() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
-    </AdminLayout>
+    </SalesLayout>
   );
 }

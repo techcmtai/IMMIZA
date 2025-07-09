@@ -14,10 +14,11 @@ export default function App({ Component, pageProps }) {
   // Check if the current page is admin or agent page
   const isAdminPage = router.pathname.startsWith('/admin');
   const isAgentPage = router.pathname.startsWith('/agent');
+  const isSalesPage = router.pathname.startsWith('/sales');
 
   // Don't show navbar and footer on admin and agent pages
-  const showNavbar = !isAdminPage && !isAgentPage;
-  const showFooter = !isAdminPage && !isAgentPage;
+  const showNavbar = !isAdminPage && !isAgentPage && !isSalesPage;
+  const showFooter = !isAdminPage && !isAgentPage && !isSalesPage;
 
   return (
     <AuthProvider>

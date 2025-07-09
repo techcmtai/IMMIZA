@@ -7,8 +7,7 @@ const ApplicationTable = ({
   sortedApplications,
   handleSort,
   getStatusColor,
-  formatDate,
-  onDeleteClick
+  formatDate
 }) => {
   if (isLoading) {
     return (
@@ -99,7 +98,6 @@ const ApplicationTable = ({
               application={application}
               getStatusColor={getStatusColor}
               formatDate={formatDate}
-              onDeleteClick={onDeleteClick}
             />
           ))}
         </tbody>

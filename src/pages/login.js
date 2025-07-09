@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { FaGoogle, FaFacebook, FaUser, FaUserTie } from 'react-icons/fa';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -105,7 +104,7 @@ export default function Login() {
                 </label>
               </div>
               <div className="text-sm">
-                <Link href="#" className="text-rose-500 hover:text-rose-600">
+                <Link href="/forgot-password" className="text-rose-500 hover:text-rose-600">
                   Forgot password?
                 </Link>
               </div>

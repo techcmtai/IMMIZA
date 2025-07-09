@@ -3,16 +3,14 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import axios from 'axios';
-import ApplicationFilters from '@/components/admin/ApplicationFilters';
-import ApplicationTable from '@/components/admin/ApplicationTable';
-import ApplicationStatistics from '@/components/admin/ApplicationStatistics';
-import AdminLayout from '@/components/admin/AdminLayout';
-import { FaTrash, FaTimes } from 'react-icons/fa';
+import ApplicationFilters from '@/components/sales/ApplicationFilters';
+import ApplicationTable from '@/components/sales/ApplicationTable';
+import ApplicationStatistics from '@/components/sales/ApplicationStatistics';
+import SalesLayout from '@/components/sales/SalesLayout';
 
-export default function AdminApplications() {
+export default function SalesApplications() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { userId } = router.query;
   const [applications, setApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,11 +20,6 @@ export default function AdminApplications() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('submissionDate');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteModalMessage, setDeleteModalMessage] = useState('');
 
   // Lists for filter dropdowns
   const [visaTypes, setVisaTypes] = useState(['all']);
@@ -48,7 +41,7 @@ export default function AdminApplications() {
 
   // Redirect if not admin
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!loading && (!user || user.role !== 'sales')) {
       router.push('/login');
     }
   }, [user, loading, router]);
@@ -81,7 +74,7 @@ export default function AdminApplications() {
       }
     };
 
-    if (user && user.role === 'admin') {
+    if (user && user.role === 'sales') {
       fetchApplications();
     }
   }, [user]);
@@ -90,7 +83,6 @@ export default function AdminApplications() {
 
   // Filter applications based on status, visa type, destination, and search term
   const filteredApplications = applications.filter(app => {
-    const matchesUserId = !userId || app.userId === userId;
     const matchesStatus = statusFilter === 'all' || app.currentStatus === statusFilter;
     const matchesVisaType = visaTypeFilter === 'all' || app.visaType === visaTypeFilter;
     const matchesDestination = destinationFilter === 'all' || app.destination?.name === destinationFilter;
@@ -102,7 +94,7 @@ export default function AdminApplications() {
       (app.visaType || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (app.id || app._id).toString().includes(searchTerm);
 
-    return matchesUserId && matchesStatus && matchesVisaType && matchesDestination && matchesSearch;
+    return matchesStatus && matchesVisaType && matchesDestination && matchesSearch;
   });
 
   // Sort applications
@@ -225,40 +217,6 @@ export default function AdminApplications() {
     }
   };
 
-  // Delete handler
-  const handleDeleteClick = (application) => {
-    setDeleteTarget(application);
-    setDeleteConfirmText('');
-    setDeleteModalMessage('');
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
-    setIsDeleting(true);
-    setDeleteModalMessage('');
-    try {
-      // Replace with your actual delete API call
-      const res = await axios.delete(`/api/applications/${deleteTarget.id || deleteTarget._id}`);
-      if (res.data && res.data.success) {
-        setDeleteModalMessage('Application deleted successfully.');
-        setApplications(applications.filter(app => (app.id || app._id) !== (deleteTarget.id || deleteTarget._id)));
-        setTimeout(() => {
-          setShowDeleteModal(false);
-          setDeleteTarget(null);
-          setDeleteConfirmText('');
-          setDeleteModalMessage('');
-        }, 1000);
-      } else {
-        setDeleteModalMessage(res.data.message || 'Failed to delete application.');
-      }
-    } catch (err) {
-      setDeleteModalMessage(err.response?.data?.message || 'Failed to delete application.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-64px)]">
@@ -268,30 +226,17 @@ export default function AdminApplications() {
   }
 
   return (
-    <AdminLayout>
+    <SalesLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Visa Applications</h1>
           <Link
-            href="/admin"
+            href="/sales"
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             Back to Dashboard
           </Link>
         </div>
-
-        {userId && (
-          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-md flex justify-between items-center">
-            <span>Filtering applications for a specific user.</span>
-            <button
-              onClick={() => router.push('/admin/applications')}
-              className="text-blue-700 hover:text-blue-900 font-bold"
-            >
-              <FaTimes className="mr-1 inline-block" />
-              Clear Filter
-            </button>
-          </div>
-        )}
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-6 rounded">
@@ -322,55 +267,12 @@ export default function AdminApplications() {
             handleSort={handleSort}
             getStatusColor={getStatusColor}
             formatDate={formatDate}
-            onDeleteClick={handleDeleteClick}
           />
         </div>
 
         {/* Statistics */}
         <ApplicationStatistics applications={applications} />
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteModal && (
-        <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-              <div className="flex items-center mb-4">
-                <FaTrash className="text-red-500 mr-2" />
-                <h2 className="text-lg font-semibold text-gray-900">Confirm Delete</h2>
-              </div>
-              <p className="mb-4 text-gray-700">Type <span className="font-bold">confirm</span> to delete this application. This action cannot be undone.</p>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-                placeholder="confirm"
-                value={deleteConfirmText}
-                onChange={e => setDeleteConfirmText(e.target.value)}
-                disabled={isDeleting}
-              />
-              {deleteModalMessage && (
-                <div className={`mb-2 text-sm ${deleteModalMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{deleteModalMessage}</div>
-              )}
-              <div className="flex justify-end space-x-3">
-                <button
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); setDeleteConfirmText(''); setDeleteModalMessage(''); }}
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={`px-4 py-2 rounded-md text-white font-medium ${deleteConfirmText === 'confirm' && !isDeleting ? 'bg-red-600 hover:bg-red-700' : 'bg-red-300 cursor-not-allowed'}`}
-                  onClick={handleDeleteConfirm}
-                  disabled={deleteConfirmText !== 'confirm' || isDeleting}
-                >
-                  {isDeleting ? (
-                    <svg className="animate-spin h-5 w-5 mr-2 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                  ) : 'Delete'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-    </AdminLayout>
+    </SalesLayout>
   );
 }

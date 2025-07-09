@@ -147,6 +147,10 @@ export const AuthProvider = ({ children }) => {
           console.log('Admin user detected, redirecting to admin dashboard');
           console.log('Admin user data:', data.user);
           router.push('/admin');
+        } else if (data.user.role == 'sales') {
+          console.log('Sales user detected, redirecting to sales dashboard');
+          console.log('Sales user data:', data.user);
+          router.push('/sales');
         } else if (data.user.role === 'agent') {
           console.log('Agent user detected, redirecting to agent dashboard');
           console.log('Agent user data:', data.user);
@@ -288,6 +292,10 @@ export const AuthProvider = ({ children }) => {
         if (data.user.role === 'admin') {
           console.log('Admin user detected, redirecting to admin dashboard');
           router.push('/admin');
+        } else if (data.user.role === 'sales') {
+          console.log('Sales user detected, redirecting to sales dashboard');
+          console.log('Sales user data:', data.user);
+          router.push('/sales');
         } else if (data.user.role === 'agent') {
           console.log('Agent user detected, redirecting to agent dashboard');
           router.push('/agent');

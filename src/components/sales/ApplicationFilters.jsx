@@ -1,11 +1,16 @@
 import React from 'react';
-import { FaPassport, FaGlobe } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaPassport, FaGlobe } from 'react-icons/fa';
 
 const ApplicationFilters = ({ 
+  statusFilter, 
+  setStatusFilter, 
   visaTypeFilter, 
   setVisaTypeFilter,
   destinationFilter,
   setDestinationFilter,
+  searchTerm,
+  setSearchTerm,
+  statusOptions,
   visaTypes,
   destinations
 }) => {

@@ -160,7 +160,7 @@ export default function AgentApplicationDetail() {
 
   return (
     <AgentLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16 md:mt-20">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">

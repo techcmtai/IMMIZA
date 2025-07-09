@@ -1,8 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaEye, FaTrash } from 'react-icons/fa';
+import { FaEye } from 'react-icons/fa';
 
-const ApplicationTableRow = ({ application, getStatusColor, formatDate, onDeleteClick }) => {
+const ApplicationTableRow = ({ application, getStatusColor, formatDate }) => {
   return (
     <tr key={application.id || application._id} className="hover:bg-gray-50">
       <td className="px-6 py-4 whitespace-nowrap">
@@ -37,21 +37,13 @@ const ApplicationTableRow = ({ application, getStatusColor, formatDate, onDelete
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <div className="flex space-x-4">
+        <div className="flex space-x-2">
           <Link
             href={`/admin/applications/${application.id || application._id}`}
-            className="text-blue-600 hover:text-blue-900 flex items-center space-x-4"
+            className="text-blue-600 hover:text-blue-900"
           >
             <FaEye className="h-5 w-5" title="View Details" />
           </Link>
-          <button
-            type="button"
-            className="text-red-600 hover:text-red-900 flex items-center cursor-pointer"
-            onClick={() => onDeleteClick(application)}
-            title="Delete"
-          >
-            <FaTrash className="h-5 w-5" title="Delete" />
-          </button>
         </div>
       </td>
     </tr>

@@ -4,60 +4,36 @@ import axios from 'axios';
 import { FaCheckCircle } from "react-icons/fa"; // Add this import
 import { useAuth } from '@/context/AuthContext';
 
-export default function VisaApplicationForm({ destinationId: propDestinationId, destinationName: propDestinationName, visaType: propVisaType, documentChecklist: propDocumentChecklist }) {
+export default function VisaApplicationForm({ destinationId, destinationName, visaType, propDocumentChecklist }) {
   const router = useRouter();
   const { user } = useAuth();
-  const {
-    destinationId: queryDestinationId,
-    destinationName: queryDestinationName,
-    visaType: queryVisaType,
-    documentChecklist: queryDocumentChecklist
-  } = router.query;
 
-  // Use props if provided, otherwise fall back to query parameters
-  const destinationId = propDestinationId || queryDestinationId;
-  const destinationName = propDestinationName || queryDestinationName;
-  const visaType = propVisaType || queryVisaType;
+  console.log(destinationId, destinationName, visaType, propDocumentChecklist);
 
-  // Parse document checklist from URL parameter
-  const [documentChecklist, setDocumentChecklist] = useState([]);
+  // Use propDocumentChecklist if provided, otherwise parse from query
+  const [documentChecklist, setDocumentChecklist] = useState(propDocumentChecklist || []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    destinationId: '',
-    destinationName: '',
-    visaType: '',
     documents: {}
   });
 
-  // Parse document checklist when it's available in the URL
   useEffect(() => {
-    if (queryDocumentChecklist) {
+    if (propDocumentChecklist && propDocumentChecklist.length > 0) {
+      setDocumentChecklist(propDocumentChecklist);
+    } else if (documentChecklist) {
       try {
-        const parsedChecklist = JSON.parse(decodeURIComponent(queryDocumentChecklist));
-        if (Array.isArray(parsedChecklist)) {
-          setDocumentChecklist(parsedChecklist);
+        if (Array.isArray(documentChecklist)) {
+          setDocumentChecklist(documentChecklist);
         }
       } catch (error) {
         console.error('Error parsing document checklist:', error);
       }
     }
-  }, [queryDocumentChecklist]);
-
-  // Update form data when query parameters change
-  useEffect(() => {
-    if (destinationId && destinationName && visaType) {
-      setFormData(prev => ({
-        ...prev,
-        destinationId,
-        destinationName,
-        visaType
-      }));
-    }
-  }, [destinationId, destinationName, visaType]);
+  }, [propDocumentChecklist, documentChecklist]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -135,6 +111,22 @@ export default function VisaApplicationForm({ destinationId: propDestinationId, 
     setIsSubmitting(true);
     setError('');
 
+    // Debug: log props before submit
+    console.log('Submitting with:', {
+      name: formData.name,
+      email: formData.email,
+      destinationId: destinationId,
+      destinationName: destinationName,
+      visaType: visaType
+    });
+
+    // Check required fields before uploading documents
+    if (!destinationId || !destinationName || !visaType) {
+      setError('Please select a country and visa type before submitting.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Upload all files to Firebase Storage
       const uploadedDocuments = [];
@@ -166,9 +158,9 @@ export default function VisaApplicationForm({ destinationId: propDestinationId, 
       const submitData = {
         name: formData.name,
         email: formData.email,
-        destinationId: formData.destinationId,
-        destinationName: formData.destinationName,
-        visaType: formData.visaType,
+        destinationId: destinationId || '',
+        destinationName: destinationName || '',
+        visaType: visaType || '',
         documents: uploadedDocuments,
         userId: user?.id || user?.uid || null,
         agentName: user?.displayName || user?.username || '',
@@ -181,7 +173,7 @@ export default function VisaApplicationForm({ destinationId: propDestinationId, 
       if (response.data.success) {
         // Show success message and redirect to dashboard
         alert('Application submitted successfully! Your data has been saved to Firebase with secure image URLs.');
-        router.push('/dashboard');
+        router.push('/agent');
       } else {
         setError(response.data.message || 'Failed to submit application');
       }
@@ -198,10 +190,10 @@ export default function VisaApplicationForm({ destinationId: propDestinationId, 
       <h2 className="text-2xl font-bold mb-2 text-gray-800">Submit Visa Application</h2>
 
       {/* Display destination and visa type information if available */}
-      {formData.destinationName && formData.visaType && (
+      {destinationName && visaType && (
         <div className="bg-[#fdf0f2] border-l-4 border-[#b76e79] p-4 mb-6">
           <p className="text-[#b76e79]">
-            You are applying for a <strong>{formData.visaType} Visa</strong> to <strong>{formData.destinationName}</strong>
+            You are applying for a <strong>{visaType} Visa</strong> to <strong>{destinationName}</strong>
           </p>
         </div>
       )}
@@ -250,7 +242,7 @@ export default function VisaApplicationForm({ destinationId: propDestinationId, 
             Please upload all the required documents listed below.
           </p>
 
-          {documentChecklist?.length > 0 ? (
+          {documentChecklist.length > 0 ? (
             <ul className="list-disc pl-5 text-[#b76e79] text-sm">
             <li>
               If you do not have a document, please <a href="https://wa.me/919053603098" className="text-[#b76e79] underline" target="_blank" rel="noopener noreferrer">contact us</a>.

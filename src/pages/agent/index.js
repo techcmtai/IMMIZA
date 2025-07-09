@@ -8,6 +8,8 @@ import AgentLayout from '@/components/agent/AgentLayout';
 import PendingVerificationView from '@/components/agent/PendingVerificationView';
 import RejectedVerificationView from '@/components/agent/RejectedVerificationView';
 import { getUserById } from '@/lib/firestore'; // <-- Add this import
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function AgentDashboard() {
   const { user, loading, updateUserData } = useAuth();
@@ -16,7 +18,7 @@ export default function AgentDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [acceptingId, setAcceptingId] = useState(null);
-  const [filterType, setFilterType] = useState('accepted'); // 'accepted' or 'all'
+  const [showStartModal, setShowStartModal] = useState(false);
 
   // Fetch latest user data from Firestore on mount or when user.id changes
   useEffect(() => {
@@ -132,6 +134,43 @@ export default function AgentDashboard() {
     }
   };
 
+  // Modal component for starting a new application
+  const StartApplicationModal = () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+        <button
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-2xl"
+          onClick={() => setShowStartModal(false)}
+        >
+          &times;
+        </button>
+        <h2 className="text-xl font-bold mb-4">Start New Application</h2>
+        {/* Form skeleton - fields will be added next */}
+        <form>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Applicant Name</label>
+            <input type="text" className="mt-1 p-2 block w-full border rounded-md bg-gray-100" disabled placeholder="(To be implemented)" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" className="mt-1 p-2 block w-full border rounded-md bg-gray-100" disabled placeholder="(To be implemented)" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Destination</label>
+            <input type="text" className="mt-1 p-2 block w-full border rounded-md bg-gray-100" disabled placeholder="(To be implemented)" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Visa Type</label>
+            <input type="text" className="mt-1 p-2 block w-full border rounded-md bg-gray-100" disabled placeholder="(To be implemented)" />
+          </div>
+          <button type="button" className="w-full py-2 px-4 bg-rose-500 text-white rounded-md font-semibold opacity-50 cursor-not-allowed" disabled>
+            Submit (Coming Soon)
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
   if (loading || !user) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-64px)]">
@@ -182,6 +221,16 @@ export default function AgentDashboard() {
   const renderApprovedDashboard = () => {
     return (
       <>
+        {/* Start Application Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            className="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-6 rounded-md shadow"
+            onClick={() => router.push('/agent/start-application')}
+          >
+            + Start Application
+          </button>
+        </div>
+        {showStartModal && <StartApplicationModal />}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Agent Dashboard</h1>
         </div>
@@ -196,7 +245,7 @@ export default function AgentDashboard() {
               <div>
                 <div className="text-sm font-medium text-gray-500">Accepted Applications</div>
                 <div className="mt-1 text-3xl font-semibold text-gray-900">
-                  {user?.projectCount || applications.filter(app => app.agentId === user?.id).length || 0}
+                  {applications.filter(app => app.agentId === user?.id).length}
                 </div>
               </div>
             </div>
@@ -242,14 +291,8 @@ export default function AgentDashboard() {
         <div className="bg-white shadow overflow-hidden rounded-lg">
           <div className="px-4 py-5 sm:px-6 bg-gray-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <div>
-              <h2 className="text-lg font-medium text-gray-900">
-                {filterType === 'accepted' ? 'My Visa Applications' : 'All Visa Applications'}
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                {filterType === 'accepted'
-                  ? 'Manage your accepted visa applications'
-                  : 'Accept and manage visa applications'}
-              </p>
+              <h2 className="text-lg font-medium text-gray-900">My Applications</h2>
+              <p className="mt-1 text-sm text-gray-500">Applications you have accepted</p>
             </div>
           </div>
 
@@ -262,12 +305,6 @@ export default function AgentDashboard() {
               <FaExclamationCircle className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
               <p className="mt-1 text-sm text-gray-500">There are no visa applications available at the moment.</p>
-            </div>
-          ) : filterType === 'accepted' && applications.filter(app => app.agentId === user.id).length === 0 ? (
-            <div className="text-center py-12">
-              <FaExclamationCircle className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No accepted applications</h3>
-              <p className="mt-1 text-sm text-gray-500">You haven&apos;t accepted any applications yet. Change the filter to All Applications to see available applications.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -296,7 +333,7 @@ export default function AgentDashboard() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {applications
-                    .filter(app => filterType === 'all' || (filterType === 'accepted' && app.agentId === user.id))
+                    .filter(app => app.userId === (user.id || user.uid))
                     .map((application) => (
                     <tr key={application.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">

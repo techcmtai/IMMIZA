@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { registerUser } from '@/lib/auth-firebase';
 import { FaGoogle, FaFacebook, FaUser, FaUserTie, FaUserCog, FaChevronDown } from 'react-icons/fa';
 
 export default function Signup() {
@@ -61,40 +62,6 @@ export default function Signup() {
     } catch (error) {
       console.error('Error fetching existing employees:', error);
     }
-  };
-
-  const handleVisaTypeSelect = (visaType) => {
-    setSelectedVisaType(visaType);
-  };
-
-  // Check if a visa type is already taken for the selected country
-  const isVisaTypeTaken = (visaType) => {
-    if (!selectedCountry) return false;
-
-    const selectedCountryName = countries.find(c => c.id === selectedCountry)?.name;
-    if (!selectedCountryName) return false;
-
-    return existingEmployees.some(employee =>
-      employee.country === selectedCountryName &&
-      employee.visaType &&
-      employee.visaType.toLowerCase() === visaType.toLowerCase()
-    );
-  };
-
-  // Get employee name who has taken this visa type for the selected country
-  const getEmployeeForVisaType = (visaType) => {
-    if (!selectedCountry) return null;
-
-    const selectedCountryName = countries.find(c => c.id === selectedCountry)?.name;
-    if (!selectedCountryName) return null;
-
-    const employee = existingEmployees.find(emp =>
-      emp.country === selectedCountryName &&
-      emp.visaType &&
-      emp.visaType.toLowerCase() === visaType.toLowerCase()
-    );
-
-    return employee ? employee.username : null;
   };
 
   const handleSubmit = async (e) => {
@@ -183,17 +150,26 @@ export default function Signup() {
       ? countries.find(c => c.id === selectedCountry)?.name
       : undefined;
 
+    // Call the context's register function which handles the API call for Firestore
     const result = await register(username, email, phoneNumber, password, userType, {
       country: userType === 'employee' ? selectedCountryName : undefined,
       visaTypes: userType === 'employee' ? [selectedVisaType] : undefined,
     });
 
-    if (!result.success) {
+    // If the API call (Firestore user creation) is successful, then create user in Firebase Auth
+    if (result.success) {
+      const authResult = await registerUser(email, password);
+      if (!authResult.success) {
+        // Handle case where Auth creation fails after Firestore user is created
+        setError(authResult.message || 'Authentication setup failed. Please contact support.');
+        setIsLoading(false);
+      }
+      // On full success, the register function will handle redirect, so we don't need to do anything here.
+    } else {
+      // If API call fails, show the error
       setError(result.message || 'Registration failed');
       setIsLoading(false);
     }
-
-    // Note: We don't set isLoading to false on success because the page will redirect
   };
 
   return (

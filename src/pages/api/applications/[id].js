@@ -1,4 +1,6 @@
 import { getApplicationById, updateApplicationStatus } from '@/lib/firestore';
+import { deleteDocument } from '@/lib/firestore';
+import { COLLECTIONS } from '@/lib/firestore';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -65,6 +67,32 @@ export default async function handler(req, res) {
       return res.status(500).json({
         success: false,
         message: 'Error updating application status',
+        error: error.message
+      });
+    }
+  }
+
+  // DELETE - Delete application
+  if (req.method === 'DELETE') {
+    try {
+      // Check if application exists
+      const application = await getApplicationById(id);
+      if (!application) {
+        return res.status(404).json({
+          success: false,
+          message: 'Application not found'
+        });
+      }
+      await deleteDocument(COLLECTIONS.APPLICATIONS, id);
+      return res.status(200).json({
+        success: true,
+        message: 'Application deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting application:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error deleting application',
         error: error.message
       });
     }

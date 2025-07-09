@@ -1,4 +1,3 @@
-import { registerUser } from '@/lib/auth-firebase';
 import { getUserByEmail, createUser } from '@/lib/firestore';
 import bcrypt from 'bcrypt';
 import { createToken, setTokenCookie } from '@/lib/token-utils';

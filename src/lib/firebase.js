@@ -1,20 +1,23 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDKSE1rWpOgyDyAaAIwYnslXpHi1ZeuoAE",
-  authDomain: "immiza-portal.firebaseapp.com",
-  databaseURL: "https://immiza-portal-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "immiza-portal",
-  storageBucket: "immiza-portal.firebasestorage.app",
-  messagingSenderId: "191358096605",
-  appId: "1:191358096605:web:e37fd52c4ed824f0ddf734",
-  measurementId: "G-G56PYJB0EX"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -22,7 +25,8 @@ let app, db, auth, storage;
 
 try {
   console.log("Initializing Firebase app");
-  app = initializeApp(firebaseConfig);
+  // Check if Firebase app is already initialized
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   console.log("Firebase app initialized successfully");
 } catch (error) {
   console.error("Error initializing Firebase app:", error);
