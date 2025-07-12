@@ -1,66 +1,27 @@
-import { getAuth } from "firebase-admin/auth";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
 import nodemailer from "nodemailer";
-
-// Initialize Firebase Admin if not already initialized
-if (!getApps().length) {
-  try {
-    // Check if we have the service account key
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-      // Parse the service account key JSON
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-      
-      initializeApp({
-        credential: cert(serviceAccount)
-      });
-      console.log('Firebase Admin SDK initialized successfully with service account');
-    } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-      // Initialize with individual credentials
-      initializeApp({
-        credential: cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          // Handle the private key correctly - it might be stored with escaped newlines
-          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-        }),
-      });
-      console.log('Firebase Admin SDK initialized successfully with individual credentials');
-    } else {
-      console.error('Missing Firebase Admin SDK credentials in environment variables');
-      // Initialize with application default credentials or config from env
-      initializeApp();
-      console.log('Firebase Admin SDK initialized with application default credentials');
-    }
-  } catch (error) {
-    console.error('Error initializing Firebase Admin SDK:', error);
-  }
-}
+import { resetPassword } from "@/lib/auth-firebase";
+import { auth } from "@/lib/firebase";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
-
   const { email } = req.body;
 
   if (!email) {
     return res.status(400).json({ success: false, message: 'Email is required' });
   }
-
   try {
-    const user = await getAuth().getUserByEmail(email);
-    const link = await getAuth().generatePasswordResetLink(email);
-
+    const link = await resetPassword(auth, email);
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE === 'true', // Convert string to boolean
+      secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
       },
     });
-
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: email,
@@ -73,7 +34,7 @@ export default async function handler(req, res) {
   </div>
   <div style="padding: 20px;">
     <h2 style="color: #333;">Password Reset Request</h2>
-    <p>Hello ${user.displayName || ''},</p>
+    <p>Hello ${email},</p>
     <p>We received a request to reset the password for your IMMIZA account. You can reset your password by clicking the button below:</p>
     <div style="text-align: center; margin: 20px 0;">
       <a href="${link}" style="background-color: #b76e79; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Your Password</a>
@@ -90,44 +51,19 @@ export default async function handler(req, res) {
 </div>
       `,
     };
-
     await transporter.sendMail(mailOptions);
-
     res.status(200).json({ success: true, message: 'Password reset link sent to your email.' });
   } catch (error) {
-    console.error('Error sending password reset email:', error);
-    
-    // Handle specific Firebase Auth errors
     if (error.code === 'auth/user-not-found') {
-      // We don't want to reveal that the user doesn't exist for security reasons
-      return res.status(200).json({ 
-        success: true, 
-        message: 'If your email is registered, you will receive a password reset link.' 
-      });
+      return res.status(200).json({ success: true, message: 'If your email is registered, you will receive a password reset link.' });
     } else if (error.code === 'auth/invalid-email') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'The email address is not valid.' 
-      });
+      return res.status(400).json({ success: false, message: 'The email address is not valid.' });
     } else if (error.code?.startsWith('auth/')) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Authentication error. Please try again later.' 
-      });
+      return res.status(400).json({ success: false, message: 'Authentication error. Please try again later.' });
     }
-    
-    // Handle SMTP/email sending errors
     if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Unable to connect to email server. Please try again later.' 
-      });
+      return res.status(500).json({ success: false, message: 'Unable to connect to email server. Please try again later.' });
     }
-    
-    // Generic error
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error sending password reset email. Please try again later.' 
-    });
+    res.status(500).json({ success: false, message: 'Error sending password reset email. Please try again later.' });
   }
 } 

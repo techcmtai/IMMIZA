@@ -92,7 +92,7 @@ export async function signOut() {
 }
 
 // Reset password
-export async function resetPassword(email) {
+export async function resetPassword(auth, email) {
   try {
     await sendPasswordResetEmail(auth, email);
     return { success: true };
@@ -154,19 +154,15 @@ export async function verifyToken(req) {
       return null;
     }
 
-    console.log('Attempting to verify token with current secret');
 
     // Try to verify with the current secret
     let decoded;
     try {
       decoded = jwt.verify(tokenString, JWT_SECRET);
-      console.log('Token verified with current secret');
     } catch (newSecretError) {
-      console.log('Failed to verify with current secret, trying old secret');
       // If that fails, try with the old secret
       try {
         decoded = jwt.verify(tokenString, OLD_JWT_SECRET);
-        console.log('Token verified with old secret in verifyToken function');
       } catch (oldSecretError) {
         // If both fail, log and return null
         console.error('Token verification failed with both secrets:', newSecretError);
