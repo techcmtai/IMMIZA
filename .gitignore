@@ -38,6 +38,9 @@ src/lib/serviceAccountKey.json
 # vercel
 .vercel
 
+# service account key
+src/lib/serviceAccountKey.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
