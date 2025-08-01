@@ -131,7 +131,7 @@ export default function UploadDocuments() {
         <div className="mb-6">
           <Link
             href="/dashboard"
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+            className="inline-flex items-center text-sm text-red-300 hover:text-red-400"
           >
             <FaArrowLeft className="mr-2" /> Back to Dashboard
           </Link>
@@ -178,20 +178,33 @@ export default function UploadDocuments() {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <div className="bg-blue-50 border-l-4 border-red-400 p-4 mb-6">
                       <div className="flex">
                         <div className="flex-shrink-0">
-                          <FaFileAlt className="h-5 w-5 text-blue-400" />
+                          <FaFileAlt className="h-5 w-5 text-red-400" />
                         </div>
                         <div className="ml-3 w-full">
-                          <p className="text-sm font-medium text-blue-700 mb-2">
+                          <p className="text-sm font-medium text-red-600 mb-2">
                             Required Documents:
                           </p>
+                          {/* Show the latest status note if available */}
+                          {(() => {
+                            const latestStatusEntry = application.statusHistory
+                              ?.filter(entry => entry.status === 'Additional Documents Needed')
+                              .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                            
+                            return latestStatusEntry?.note ? (
+                              <div className="mb-3 p-2 bg-blue-100 rounded-md">
+                                <p className="text-xs font-medium text-red-700 mb-1">Admin Note:</p>
+                                <p className="text-xs text-red-600">{latestStatusEntry.note}</p>
+                              </div>
+                            ) : null;
+                          })()}
                           <ul className="text-sm space-y-1 mt-2">
                             {requiredDocuments.map((doc, index) => {
                               const isUploaded = uploadedDocuments.includes(doc);
                               return (
-                                <li key={index} className={`flex items-center ${isUploaded ? 'text-green-600' : 'text-blue-700'}`}>
+                                <li key={index} className={`flex items-center ${isUploaded ? 'text-red-400' : 'text-red-600'}`}>
                                   {isUploaded ? (
                                     <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

@@ -334,124 +334,126 @@ export default function AgentApplicationDetail() {
               </div>
             </div>
 
-            {/* Right Column - Status Update */}
-            <div className="space-y-6">
-              <div className="bg-white shadow overflow-hidden rounded-lg">
-                <div className="px-4 py-5 sm:px-6 bg-gray-50">
-                  <h2 className="text-lg font-medium text-gray-900">Update Status</h2>
-                  <p className="mt-1 max-w-2xl text-sm text-gray-500">Change the application status and add notes.</p>
-                </div>
-                <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
-                  {updateSuccess && (
-                    <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded flex items-center">
-                      <FaCheckCircle className="mr-2" />
-                      Status updated successfully
-                    </div>
-                  )}
-
-                  {updateError && (
-                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                      {updateError}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleStatusUpdate} className="space-y-4">
-                    <div>
-                      <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                        Status
-                      </label>
-                      <select
-                        id="status"
-                        value={newStatus}
-                        onChange={(e) => setNewStatus(e.target.value)}
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm rounded-md"
-                      >
-                        <option value="Document Submitted">Document Submitted</option>
-                        <option value="Additional Document Needed">Additional Document Needed</option>
-                        <option value="Additional Document Submitted">Additional Document Submitted</option>
-                        <option value="Visa Approved">Visa Approved</option>
-                        <option value="Offer Letter Sent">Offer Letter Sent</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="note" className="block text-sm font-medium text-gray-700">
-                        Note
-                      </label>
-                      <textarea
-                        id="note"
-                        value={statusNote}
-                        onChange={(e) => setStatusNote(e.target.value)}
-                        rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
-                        placeholder="Add a note about this status update"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="tentativeDate" className="block text-sm font-medium text-gray-700">
-                        Tentative Date (Optional)
-                      </label>
-                      <input
-                        type="date"
-                        id="tentativeDate"
-                        value={tentativeDate}
-                        onChange={(e) => setTentativeDate(e.target.value)}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
-                      />
-                    </div>
-
-                    {newStatus === 'Additional Document Needed' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Required Documents
-                        </label>
-                        <p className="text-xs text-gray-500 mb-2">
-                          Specify documents that the applicant needs to provide
-                        </p>
-
-                        {requiredDocuments.map((doc, index) => (
-                          <div key={index} className="flex items-center mt-2">
-                            <input
-                              type="text"
-                              value={doc}
-                              onChange={(e) => updateDocumentField(index, e.target.value)}
-                              className="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
-                              placeholder="Document name"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeDocumentField(index)}
-                              className="ml-2 text-gray-400 hover:text-gray-500"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={addDocumentField}
-                          className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-rose-700 bg-rose-100 hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
-                        >
-                          + Add Document
-                        </button>
+            {/* Right Column - Status Update - Hidden for Agents */}
+            {user.role !== 'agent' && (
+              <div className="space-y-6">
+                <div className="bg-white shadow overflow-hidden rounded-lg">
+                  <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                    <h2 className="text-lg font-medium text-gray-900">Update Status</h2>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Change the application status and add notes.</p>
+                  </div>
+                  <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
+                    {updateSuccess && (
+                      <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded flex items-center">
+                        <FaCheckCircle className="mr-2" />
+                        Status updated successfully
                       </div>
                     )}
 
-                    <div className="pt-4">
-                      <button
-                        type="submit"
-                        disabled={isUpdating}
-                        className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 cursor-pointer"
-                      >
-                        {isUpdating ? 'Updating...' : 'Update Status'}
-                      </button>
-                    </div>
-                  </form>
+                    {updateError && (
+                      <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {updateError}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleStatusUpdate} className="space-y-4">
+                      <div>
+                        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                          Status
+                        </label>
+                        <select
+                          id="status"
+                          value={newStatus}
+                          onChange={(e) => setNewStatus(e.target.value)}
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm rounded-md"
+                        >
+                          <option value="Document Submitted">Document Submitted</option>
+                          <option value="Additional Document Needed">Additional Document Needed</option>
+                          <option value="Additional Document Submitted">Additional Document Submitted</option>
+                          <option value="Visa Approved">Visa Approved</option>
+                          <option value="Offer Letter Sent">Offer Letter Sent</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="note" className="block text-sm font-medium text-gray-700">
+                          Note
+                        </label>
+                        <textarea
+                          id="note"
+                          value={statusNote}
+                          onChange={(e) => setStatusNote(e.target.value)}
+                          rows={3}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
+                          placeholder="Add a note about this status update"
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="tentativeDate" className="block text-sm font-medium text-gray-700">
+                          Tentative Date (Optional)
+                        </label>
+                        <input
+                          type="date"
+                          id="tentativeDate"
+                          value={tentativeDate}
+                          onChange={(e) => setTentativeDate(e.target.value)}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
+                        />
+                      </div>
+
+                      {newStatus === 'Additional Document Needed' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Required Documents
+                          </label>
+                          <p className="text-xs text-gray-500 mb-2">
+                            Specify documents that the applicant needs to provide
+                          </p>
+
+                          {requiredDocuments.map((doc, index) => (
+                            <div key={index} className="flex items-center mt-2">
+                              <input
+                                type="text"
+                                value={doc}
+                                onChange={(e) => updateDocumentField(index, e.target.value)}
+                                className="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm"
+                                placeholder="Document name"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeDocumentField(index)}
+                                className="ml-2 text-gray-400 hover:text-gray-500"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={addDocumentField}
+                            className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-rose-700 bg-rose-100 hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
+                          >
+                            + Add Document
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="pt-4">
+                        <button
+                          type="submit"
+                          disabled={isUpdating}
+                          className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isUpdating ? 'Updating...' : 'Update Status'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-12">
