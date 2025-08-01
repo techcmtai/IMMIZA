@@ -276,8 +276,8 @@ export default function SubmittedApplications({ applications: initialApplication
                               {/* If we have multiple documents */}
                               {latestStatusWithDocs?.requiredDocuments && latestStatusWithDocs.requiredDocuments.length > 0 ? (
                                 <div>
-                                  <p className="text-sm font-medium text-yellow-700">Required Documents:</p>
-                                  <ul className="list-disc pl-5 mt-1">
+                                  <p className="text-sm font-medium text-yellow-700 mb-2">Required Documents:</p>
+                                  <div className="space-y-2">
                                     {Array.isArray(latestStatusWithDocs.requiredDocuments) &&
                                      latestStatusWithDocs.requiredDocuments.map((doc, index) => {
                                       if (!doc) return null; // Skip empty entries
@@ -290,50 +290,84 @@ export default function SubmittedApplications({ applications: initialApplication
                                         );
 
                                       return (
-                                        <li key={index} className={`text-sm ${isUploaded ? 'text-green-600' : 'text-yellow-700'}`}>
-                                          <a
-                                            href={`/dashboard/upload-documents/${application.id || application._id}`}
-                                            className="hover:underline flex items-center"
-                                          >
+                                        <div key={index} className={`flex items-center justify-between p-2 rounded-md ${isUploaded ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+                                          <div className="flex items-center">
                                             {isUploaded ? (
-                                              <svg className="inline-block h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                              <svg className="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                               </svg>
                                             ) : (
-                                              <svg className="inline-block h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                              <svg className="h-5 w-5 text-yellow-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                               </svg>
                                             )}
-                                            {doc} {isUploaded ? '(Uploaded)' : ''}
-                                          </a>
-                                        </li>
+                                            <span className={`text-sm font-medium ${isUploaded ? 'text-green-700' : 'text-yellow-700'}`}>
+                                              {doc}
+                                            </span>
+                                            {isUploaded && (
+                                              <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                                                Uploaded
+                                              </span>
+                                            )}
+                                          </div>
+                                          {!isUploaded && (
+                                            <button
+                                              onClick={() => router.push(`/dashboard/upload-documents/${application.id || application._id}`)}
+                                              className="text-xs bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition-colors"
+                                            >
+                                              Upload
+                                            </button>
+                                          )}
+                                        </div>
                                       );
                                     })}
-                                  </ul>
+                                  </div>
                                 </div>
                               ) : (
                                 // Legacy single document support
-                                <p className="text-sm text-yellow-700">
-                                  <span className="font-medium">Required Document: </span>
-                                  <a
-                                    href={`/dashboard/upload-documents/${application.id || application._id}`}
-                                    className="hover:underline"
+                                <div className="flex items-center justify-between p-2 rounded-md bg-yellow-50 border border-yellow-200">
+                                  <div className="flex items-center">
+                                    <svg className="h-5 w-5 text-yellow-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-yellow-700">
+                                      {latestStatusWithDocs?.requiredDocument || "Additional document needed"}
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={() => router.push(`/dashboard/upload-documents/${application.id || application._id}`)}
+                                    className="text-xs bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition-colors"
                                   >
-                                    {latestStatusWithDocs?.requiredDocument || "Additional document needed"}
-                                  </a>
-                                </p>
+                                    Upload
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </div>
                         </div>
                       );
                     })()}
-                    <button
-                      onClick={() => router.push(`/dashboard/upload-documents/${application.id || application._id}`)}
-                      className="bg-yellow-500 text-white py-1.5 px-4 rounded-md hover:bg-yellow-600 transition-colors text-sm"
-                    >
-                      Upload All Required Documents
-                    </button>
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <svg className="h-5 w-5 text-red-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-sm font-medium text-red-700">
+                            Upload Required Documents
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => router.push(`/dashboard/upload-documents/${application.id || application._id}`)}
+                          className="bg-red-300 text-white py-2 px-4 rounded-md hover:bg-red-400 transition-colors text-sm font-medium"
+                        >
+                          Upload Documents
+                        </button>
+                      </div>
+                      <p className="text-xs text-red-600 mt-1">
+                        Click to upload all required documents at once
+                      </p>
+                    </div>
                   </div>
                 )}
                 
@@ -480,4 +514,3 @@ export default function SubmittedApplications({ applications: initialApplication
     </div>
   );
 }
-

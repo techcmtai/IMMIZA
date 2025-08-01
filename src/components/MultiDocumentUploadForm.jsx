@@ -180,7 +180,7 @@ export default function MultiDocumentUploadForm({
       {isUploading && (
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div
-            className="bg-blue-600 h-2.5 rounded-full"
+            className="bg-red-400 h-2.5 rounded-full"
             style={{ width: `${uploadProgress}%` }}
           ></div>
           <p className="text-xs text-gray-500 mt-1 text-right">
@@ -194,7 +194,7 @@ export default function MultiDocumentUploadForm({
           <button
             type="submit"
             disabled={isUploading || Object.keys(selectedFiles).length === 0}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-400 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
               (isUploading || Object.keys(selectedFiles).length === 0) ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
